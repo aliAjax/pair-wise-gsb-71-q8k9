@@ -1,4 +1,12 @@
-import type { Baseline, DifferenceRegion, IgnoreRule, Project, ScreenshotRun } from '@/types'
+import type {
+  ApprovalBatch,
+  Baseline,
+  BatchLock,
+  DifferenceRegion,
+  IgnoreRule,
+  Project,
+  ScreenshotRun,
+} from '@/types'
 
 const STORAGE_KEY = 'visual-regression-platform-v1'
 
@@ -7,6 +15,9 @@ interface Database {
   runs: ScreenshotRun[]
   baselines: Baseline[]
   rules: IgnoreRule[]
+  batches: ApprovalBatch[]
+  /** batchId -> 当前持有写入锁的窗口 */
+  locks: Record<string, BatchLock>
 }
 
 const projects: Project[] = [
@@ -159,6 +170,11 @@ const runs: ScreenshotRun[] = [
   },
 ]
 
+// 种子运行的当前图指纹：由版本、差异率和拍摄时间稳定推导，便于演示“截图被换掉”
+runs.forEach((run) => {
+  run.imageFingerprint = `img-${run.id}-${run.currentVersion}`
+})
+
 const baselines: Baseline[] = [
   {
     id: 'base-commerce-checkout',
@@ -261,7 +277,7 @@ const rules: IgnoreRule[] = [
   },
 ]
 
-const seed = (): Database => ({ projects, runs, baselines, rules })
+const seed = (): Database => ({ projects, runs, baselines, rules, batches: [], locks: {} })
 
 export const readDb = (): Database => {
   const raw = localStorage.getItem(STORAGE_KEY)
@@ -271,7 +287,16 @@ export const readDb = (): Database => {
     return initial
   }
   try {
-    return JSON.parse(raw) as Database
+    const parsed = JSON.parse(raw) as Database
+    // 兼容旧版本本地存储：补齐批次与写入锁结构
+    return {
+      projects: parsed.projects ?? projects,
+      runs: parsed.runs ?? runs,
+      baselines: parsed.baselines ?? baselines,
+      rules: parsed.rules ?? rules,
+      batches: parsed.batches ?? [],
+      locks: parsed.locks ?? {},
+    }
   } catch {
     const initial = seed()
     localStorage.setItem(STORAGE_KEY, JSON.stringify(initial))

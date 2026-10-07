@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { Message, Modal } from '@arco-design/web-vue'
 import { createRule, deleteRule, getProjects, getRules, toggleRule } from '@/api/http'
+import { useCrossWindowSync } from '@/composables/useCrossWindowSync'
 import type { IgnoreRule } from '@/types'
 
 const queryClient = useQueryClient()
@@ -20,7 +21,14 @@ const form = reactive({
 const { data: rules, isLoading } = useQuery({ queryKey: ['rules'], queryFn: getRules })
 const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: getProjects })
 
-const refreshRules = async () => queryClient.invalidateQueries({ queryKey: ['rules'] })
+useCrossWindowSync([['rules'], ['batches']])
+
+const refreshRules = async () => {
+  await queryClient.invalidateQueries({ queryKey: ['rules'] })
+  // 规则修订变化会让打开批次的受影响页立即失效待审
+  await queryClient.invalidateQueries({ queryKey: ['batches'] })
+  await queryClient.invalidateQueries({ queryKey: ['batch'] })
+}
 
 const createMutation = useMutation({
   mutationFn: createRule,

@@ -16,6 +16,7 @@ const menuItems = [
 
 const activeKey = computed(() => {
   if (route.path.startsWith('/runs')) return '/runs'
+  if (route.path.startsWith('/approvals')) return '/approvals'
   return route.path
 })
 
@@ -28,7 +29,11 @@ const pageTitle = computed(() => {
     '/rules': '忽略规则',
     '/reports': '结果与导出',
   }
-  return route.name === 'run-detail' ? '差异定位评审' : map[route.path] ?? '视觉基线评审台'
+  return route.name === 'run-detail'
+    ? '差异定位评审'
+    : route.name === 'batch-detail'
+      ? '批次批准依据'
+      : map[route.path] ?? '视觉基线评审台'
 })
 
 const navigate = (key: string) => {
