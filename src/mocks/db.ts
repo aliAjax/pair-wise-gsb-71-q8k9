@@ -1,4 +1,11 @@
-import type { Baseline, DifferenceRegion, IgnoreRule, Project, ScreenshotRun } from '@/types'
+import type {
+  ApprovalBatch,
+  Baseline,
+  DifferenceRegion,
+  IgnoreRule,
+  Project,
+  ScreenshotRun,
+} from '@/types'
 
 const STORAGE_KEY = 'visual-regression-platform-v1'
 
@@ -7,6 +14,9 @@ interface Database {
   runs: ScreenshotRun[]
   baselines: Baseline[]
   rules: IgnoreRule[]
+  batches: ApprovalBatch[]
+  /** 忽略规则集的全局修订号：任何规则增删改 / 启停都会递增。 */
+  ruleRevision: number
 }
 
 const projects: Project[] = [
@@ -225,6 +235,7 @@ const rules: IgnoreRule[] = [
     maxDelta: 12,
     enabled: true,
     createdAt: '2026-09-02T09:00:00+08:00',
+    revision: 3,
   },
   {
     id: 'rule-avatar',
@@ -236,6 +247,7 @@ const rules: IgnoreRule[] = [
     maxDelta: 20,
     enabled: true,
     createdAt: '2026-09-05T13:25:00+08:00',
+    revision: 2,
   },
   {
     id: 'rule-watermark',
@@ -247,6 +259,7 @@ const rules: IgnoreRule[] = [
     maxDelta: 5,
     enabled: true,
     createdAt: '2026-08-21T11:08:00+08:00',
+    revision: 1,
   },
   {
     id: 'rule-animation',
@@ -258,10 +271,45 @@ const rules: IgnoreRule[] = [
     maxDelta: 8,
     enabled: false,
     createdAt: '2026-08-16T17:12:00+08:00',
+    revision: 1,
   },
 ]
 
-const seed = (): Database => ({ projects, runs, baselines, rules })
+const CURRENT_RULE_REVISION = 6
+
+const seed = (): Database => ({
+  projects,
+  runs,
+  baselines,
+  rules,
+  batches: [],
+  ruleRevision: CURRENT_RULE_REVISION,
+})
+
+/** 兼容旧版本本地数据：补齐规则修订号与批次表。 */
+const migrate = (db: Database): Database => {
+  let changed = false
+  if (!Array.isArray(db.batches)) {
+    db.batches = []
+    changed = true
+  }
+  if (typeof db.ruleRevision !== 'number') {
+    db.ruleRevision = Math.max(
+      CURRENT_RULE_REVISION,
+      ...db.rules.map((rule) => rule.revision ?? 1),
+      1,
+    )
+    changed = true
+  }
+  for (const rule of db.rules) {
+    if (typeof rule.revision !== 'number') {
+      rule.revision = 1
+      changed = true
+    }
+  }
+  if (changed) writeDb(db)
+  return db
+}
 
 export const readDb = (): Database => {
   const raw = localStorage.getItem(STORAGE_KEY)
@@ -271,7 +319,7 @@ export const readDb = (): Database => {
     return initial
   }
   try {
-    return JSON.parse(raw) as Database
+    return migrate(JSON.parse(raw) as Database)
   } catch {
     const initial = seed()
     localStorage.setItem(STORAGE_KEY, JSON.stringify(initial))

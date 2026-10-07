@@ -834,3 +834,263 @@ code {
     height: 590px;
   }
 }
+
+/* ---------------- 批准批次 ---------------- */
+
+.lock-active {
+  color: #165dff;
+}
+
+.batch-progress {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e6eb;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.progress-item span {
+  display: block;
+  color: #86909c;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.progress-item strong {
+  font-size: 18px;
+}
+
+.progress-item strong.ok {
+  color: #00b42a;
+}
+
+.progress-spacer {
+  flex: 1;
+}
+
+.blockers {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 2px 12px;
+  color: #4e5969;
+  font-size: 12px;
+}
+
+.batch-workspace {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.batch-pages {
+  border: 1px solid #e5e6eb;
+  border-radius: 7px;
+  background: #fff;
+  padding: 12px;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+}
+
+.page-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border: 1px solid #e5e6eb;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.page-row:hover {
+  border-color: #94bfff;
+}
+
+.page-row.active {
+  border-color: #165dff;
+  background: #f2f7ff;
+}
+
+.page-row.stale {
+  border-color: #ffb8b8;
+  background: #fff7f7;
+}
+
+.page-row-main {
+  min-width: 0;
+}
+
+.page-row-main strong {
+  display: block;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-row-main small {
+  color: #86909c;
+  font-size: 11px;
+}
+
+.draft-zone {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed #e5e6eb;
+}
+
+.draft-zone h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.draft-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #f7f8fa;
+  margin-bottom: 6px;
+}
+
+.draft-item strong,
+.draft-item small {
+  display: block;
+  font-size: 12px;
+}
+
+.draft-item small {
+  color: #86909c;
+}
+
+.batch-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 16px;
+  align-items: start;
+}
+
+.basis-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e6eb;
+  background: #fcfcfd;
+}
+
+.basis-strip span {
+  display: block;
+  color: #86909c;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.basis-strip code {
+  font-size: 12px;
+}
+
+.basis-strip code.mismatch {
+  color: #f53f3f;
+}
+
+.batch-regions {
+  border-top: 1px solid #e5e6eb;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.region-item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.stale-reason {
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.reconsider-list h4,
+.checkpoint-box h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.reconsider-item {
+  padding: 8px 10px;
+  border: 1px solid #ffdbdb;
+  border-radius: 6px;
+  background: #fff7f7;
+  margin-bottom: 8px;
+}
+
+.reconsider-item small {
+  color: #86909c;
+}
+
+.reconsider-item p {
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.reconsider-item ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.reconsider-item li {
+  font-size: 12px;
+  color: #4e5969;
+  line-height: 1.7;
+}
+
+.checkpoint-box {
+  font-size: 12px;
+}
+
+.completed-panel {
+  margin-top: 16px;
+  border: 1px solid #b7e8b0;
+  border-radius: 7px;
+  background: #f6ffed;
+}
+
+.batch-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.batch-banner-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border: 1px solid #bedaff;
+  border-radius: 7px;
+  background: #eef6ff;
+}
+
+.batch-banner-item strong,
+.batch-banner-item span {
+  display: block;
+}
+
+.batch-banner-item span {
+  color: #4e5969;
+  font-size: 12px;
+}

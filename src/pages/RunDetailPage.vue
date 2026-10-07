@@ -92,8 +92,17 @@ const submitReview = () => {
 </script>
 
 <template>
-  <a-spin :loading="isLoading" style="width: 100%">
+      <a-spin :loading="isLoading" style="width: 100%">
     <template v-if="run">
+      <a-alert
+        v-if="run.batchId && run.status === 'pending'"
+        type="info"
+        style="margin-bottom: 12px"
+      >
+        该页面已纳入批准批次
+        <router-link :to="`/batches/${run.batchId}`"><b>{{ run.batchId }}</b></router-link>
+        ，请在批次内按冻结依据逐页结论；批次统一生效前此处不会切换基线。
+      </a-alert>
       <section class="detail-heading">
         <div>
           <a-space>

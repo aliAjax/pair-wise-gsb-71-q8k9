@@ -20,7 +20,12 @@ const form = reactive({
 const { data: rules, isLoading } = useQuery({ queryKey: ['rules'], queryFn: getRules })
 const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: getProjects })
 
-const refreshRules = async () => queryClient.invalidateQueries({ queryKey: ['rules'] })
+const refreshRules = async () => {
+  await queryClient.invalidateQueries({ queryKey: ['rules'] })
+  // 规则修订变化会联动失效打开批次中的受影响页面
+  await queryClient.invalidateQueries({ queryKey: ['batches'] })
+  await queryClient.invalidateQueries({ queryKey: ['batch'] })
+}
 
 const createMutation = useMutation({
   mutationFn: createRule,
@@ -88,6 +93,7 @@ const projectName = (id: string) =>
 
   <a-alert type="info" style="margin-bottom: 16px">
     规则不会自动批准整张截图；启用后仅在差异报告中折叠匹配区域，高风险区域仍需人工判定。
+    规则的增删改或启停会产生新修订：正在审批的批准批次中，命中规则变化的页面会立即失效待审，未命中页面自动对齐修订。
   </a-alert>
 
   <a-card class="table-panel" :bordered="false">
@@ -109,6 +115,11 @@ const projectName = (id: string) =>
         </a-table-column>
         <a-table-column title="最大色差" :width="110">
           <template #cell="{ record }">Δ {{ record.maxDelta }}</template>
+        </a-table-column>
+        <a-table-column title="修订" :width="90">
+          <template #cell="{ record }">
+            <a-tag size="small" color="arcoblue">r{{ record.revision ?? 1 }}</a-tag>
+          </template>
         </a-table-column>
         <a-table-column title="启用" :width="100">
           <template #cell="{ record }">

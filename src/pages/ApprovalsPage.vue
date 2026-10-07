@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { Message } from '@arco-design/web-vue'
-import { getRuns, mergeRuns } from '@/api/http'
+import { getBatches, getRuns, mergeRuns } from '@/api/http'
 import StatusTag from '@/components/StatusTag.vue'
 import type { ScreenshotRun } from '@/types'
 
@@ -13,6 +13,14 @@ const { data: runs, isLoading } = useQuery({
   queryKey: ['runs', { status: 'pending' }],
   queryFn: () => getRuns({ status: 'pending' }),
 })
+
+const { data: batches } = useQuery({
+  queryKey: ['batches', 'approvals'],
+  queryFn: getBatches,
+  refetchInterval: 4000,
+})
+
+const openBatches = computed(() => (batches.value ?? []).filter((batch) => batch.status === 'open'))
 
 const mergeMutation = useMutation({
   mutationFn: mergeRuns,
@@ -43,6 +51,22 @@ const unignoredCount = (run: ScreenshotRun) =>
       </a-button>
     </a-space>
   </section>
+
+  <div v-if="openBatches.length" class="batch-banner">
+    <div v-for="batch in openBatches" :key="batch.id" class="batch-banner-item">
+      <div>
+        <strong>{{ batch.name }}</strong>
+        <span>
+          {{ batch.items.filter((i) => i.status === 'approved' || i.status === 'rejected').length }}/{{ batch.items.length }} 页已结论 ·
+          统一修订 r{{ batch.ruleRevision }}
+          <a-tag v-if="batch.items.some((i) => i.validity === 'stale')" color="red" size="small">
+            {{ batch.items.filter((i) => i.validity === 'stale').length }} 页失效待审
+          </a-tag>
+        </span>
+      </div>
+      <router-link :to="`/batches/${batch.id}`">进入批次评审 →</router-link>
+    </div>
+  </div>
 
   <div class="queue-summary">
     <div>

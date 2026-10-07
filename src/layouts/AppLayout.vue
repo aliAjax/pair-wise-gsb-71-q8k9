@@ -8,6 +8,7 @@ const router = useRouter()
 const menuItems = [
   { key: '/', label: '运行概览', icon: 'icon-dashboard' },
   { key: '/runs', label: '回归运行', icon: 'icon-apps' },
+  { key: '/batches', label: '批准批次', icon: 'icon-storage' },
   { key: '/approvals', label: '审批队列', icon: 'icon-check-circle' },
   { key: '/baselines', label: '历史基线', icon: 'icon-history' },
   { key: '/rules', label: '忽略规则', icon: 'icon-filter' },
@@ -16,6 +17,7 @@ const menuItems = [
 
 const activeKey = computed(() => {
   if (route.path.startsWith('/runs')) return '/runs'
+  if (route.path.startsWith('/batches')) return '/batches'
   return route.path
 })
 
@@ -23,12 +25,15 @@ const pageTitle = computed(() => {
   const map: Record<string, string> = {
     '/': '运行概览',
     '/runs': '视觉回归运行',
+    '/batches': '发布基线批准批次',
     '/approvals': '审批队列',
     '/baselines': '历史基线',
     '/rules': '忽略规则',
     '/reports': '结果与导出',
   }
-  return route.name === 'run-detail' ? '差异定位评审' : map[route.path] ?? '视觉基线评审台'
+  if (route.name === 'run-detail') return '差异定位评审'
+  if (route.name === 'batch-detail') return '批次批准依据'
+  return map[route.path] ?? '视觉基线评审台'
 })
 
 const navigate = (key: string) => {
